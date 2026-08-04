@@ -1,0 +1,21 @@
+import random
+import math
+
+#container dimensions
+ContainerWidth = 100
+ContainerDepth = 60
+MaxWeight = 500
+
+#diameter, weight
+CYLINDERS = [
+    (20, 80),
+    (15, 60),
+    (25, 120),
+    (10, 40),
+    (30, 200)
+]
+
+PopSize = 80
+Generations = 400
+MutationRate = 0.8
+EliteSize = 5
