@@ -19,3 +19,50 @@ PopSize = 80
 Generations = 400
 MutationRate = 0.8
 EliteSize = 5
+
+def dist(x1, y1, x2, y2):
+    #calculate distance between two cylinder centres
+    return math.hypot(x1 - x2, y1 - y2)
+
+def overlap(c1, c2):
+    x1, y1, r1 = c1
+    x2, y2, r2 = c2
+
+    #return true if cylinders overlap
+    return dist(x1, y1, x2, y2) < (r1 + r2)
+
+def place_cylinders(ordering):  #placement
+    placed = []
+
+    #go through cylinder ordering
+    for idx in ordering:
+        d, w = CYLINDERS[idx]  #getting size d= diameter w= weight
+        r = d / 2.0
+        PlacedFlag = False  #if placed successfully
+
+        y = r  #start from bottom
+        while y <= ContainerDepth - r:
+
+            x = r
+            while x <= ContainerWidth - r:  #left to right placement
+
+                candidate = (x, y, r)
+
+                #check if any overlaps
+                if all(not overlap(candidate, p) for p in placed):
+                    placed.append(candidate)
+                    PlacedFlag = True
+                    break
+
+                x += 1
+
+            if PlacedFlag:
+                break
+
+            y += 1
+
+        #stop if wrong placement
+        if not PlacedFlag:
+            return None
+
+    return placed  #place if ok
