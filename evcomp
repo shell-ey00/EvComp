@@ -1,12 +1,12 @@
 import random
 import math
 
-#container dimensions
+# where cylinders are placed
 ContainerWidth = 100
 ContainerDepth = 60
 MaxWeight = 500
 
-#diameter, weight
+# Cylinder array (diameter, weight)
 CYLINDERS = [
     (20, 80),
     (15, 60),
@@ -15,14 +15,16 @@ CYLINDERS = [
     (30, 200)
 ]
 
-PopSize = 80
-Generations = 400
-MutationRate = 0.8
-EliteSize = 5
+PopSize = 80  #population size of solution
+Generations = 400   #re runs
+MutationRate = 0.8  #rate of change within shape layout
+EliteSize = 5  #unchanged solutions
+
 
 def dist(x1, y1, x2, y2):
     #calculate distance between two cylinder centres
     return math.hypot(x1 - x2, y1 - y2)
+
 
 def overlap(c1, c2):
     x1, y1, r1 = c1
@@ -30,6 +32,7 @@ def overlap(c1, c2):
 
     #return true if cylinders overlap
     return dist(x1, y1, x2, y2) < (r1 + r2)
+
 
 def place_cylinders(ordering):  #placement
     placed = []
@@ -66,3 +69,76 @@ def place_cylinders(ordering):  #placement
             return None
 
     return placed  #place if ok
+
+
+def fitness(individual):
+    placed = place_cylinders(individual)  #places individual cylinders gives it x y coords
+
+    if placed is None:  #give bad penalty if they overlap or in out of bounds area
+        return 1e6
+
+    total_weight = sum(CYLINDERS[i][1] for i in individual)  #checks the weight is good
+
+    #if the weight is greater than total weight must return invalid value
+    if total_weight > MaxWeight:
+        return 1e6 + (total_weight - MaxWeight) * 1000
+
+    cx = sum(placed[i][0] * CYLINDERS[individual[i]][1]  #calc the weight of center
+             for i in range(len(placed))) / total_weight
+
+    cy = sum(placed[i][1] * CYLINDERS[individual[i]][1]
+             for i in range(len(placed))) / total_weight
+
+    balance_penalty = abs(cx - ContainerWidth / 2) + \
+                      abs(cy - ContainerDepth / 2)  #calcs the center of mass
+
+    used_area = sum(math.pi * p[2]**2 for p in placed)  #used area by cylinders
+    wasted_area = (ContainerWidth * ContainerDepth) - used_area  #unused area
+
+    if wasted_area <= 0.01 and balance_penalty < 0.5:  #if less wasted area the better
+        return 0
+
+    #return wasted area and penalty
+    return wasted_area + balance_penalty * 100
+
+
+def create_individual():  #create random sol
+    ind = list(range(len(CYLINDERS)))  #create list of cylinder indexes
+    random.shuffle(ind)  #shuffle ordering randomly
+    return ind
+
+
+def crossover(p1, p2):  #create two parent
+    size = len(p1)
+
+    #pick two random crossover points
+    a, b = sorted(random.sample(range(size), 2))
+
+    child = [None] * size
+
+    #copy section from first parent
+    child[a:b] = p1[a:b]
+
+    #fill remaining values from second parent
+    fill = [g for g in p2 if g not in child]
+    ptr = 0
+
+    #fill empty space
+    for i in range(size):
+        if child[i] is None:
+            child[i] = fill[ptr]
+            ptr += 1
+
+    return child
+
+
+def mutate(ind):  #gives random positions
+
+    #check if mutation should happen
+    if random.random() < MutationRate:
+
+        #pick two random cylinder positions
+        i, j = random.sample(range(len(ind)), 2)
+
+        #swap positions
+        ind[i], ind[j] = ind[j], ind[i]
