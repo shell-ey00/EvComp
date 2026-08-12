@@ -158,3 +158,17 @@ for gen in range(Generations):
         best_fit = fitness(best)
 
     print("Generation", gen, "| Best fitness:", best_fit)
+
+#looking for best sol
+if best_fit == 0:
+
+        coords = place_cylinders(best)
+
+        print("\nPERFECT SOLUTION FOUND")
+        print("Ordering:", best)
+        print("Coordinates:")
+
+    for i, c in enumerate(coords):
+        print(f"Cylinder {best[i]} -> x={c[0]:.2f}, y={c[1]:.2f}, r={c[2]:.2f}")
+
+            return best, coords
