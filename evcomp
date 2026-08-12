@@ -142,3 +142,7 @@ def mutate(ind):  #gives random positions
 
         #swap positions
         ind[i], ind[j] = ind[j], ind[i]
+
+def run_ga():
+    #create random population
+    population = [create_individual() for _ in range(PopSize)]
