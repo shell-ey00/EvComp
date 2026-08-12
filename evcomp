@@ -146,3 +146,15 @@ def mutate(ind):  #gives random positions
 def run_ga():
     #create random population
     population = [create_individual() for _ in range(PopSize)]
+
+#repeat for amount of gens
+for gen in range(Generations):
+
+    #sort population by fitness
+    population.sort(key=fitness)
+
+        #get current best solution
+        best = population[0]
+        best_fit = fitness(best)
+
+    print("Generation", gen, "| Best fitness:", best_fit)
