@@ -175,7 +175,7 @@ for i, c in enumerate(coords):
 #keep best solutions
     new_pop = population[:EliteSize]
 
-    #create new population
+#create new population
     while len(new_pop) < PopSize:
 
         #pick two parents
@@ -192,3 +192,16 @@ for i, c in enumerate(coords):
 
     #replace old population
     population = new_pop
+
+#if perfect solution not found
+    best = population[0]
+    coords = place_cylinders(best)
+
+    print("\nBest solution found-")
+    print("Ordering-", best)
+    print("Fit-", fitness(best))
+
+    for i, c in enumerate(coords):
+        print(f"Cylinder {best[i]} -> x={c[0]:.2f}, y={c[1]:.2f}, r={c[2]:.2f}")
+
+    return best, coords
