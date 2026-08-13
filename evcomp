@@ -162,13 +162,33 @@ for gen in range(Generations):
 #looking for best sol
 if best_fit == 0:
 
-        coords = place_cylinders(best)
+    coords = place_cylinders(best)
 
-        print("\nPERFECT SOLUTION FOUND")
-        print("Ordering:", best)
-        print("Coordinates:")
+    print("\nPERFECT SOLUTION FOUND")
+    print("Ordering:", best)
+    print("Coordinates:")
 
-    for i, c in enumerate(coords):
-        print(f"Cylinder {best[i]} -> x={c[0]:.2f}, y={c[1]:.2f}, r={c[2]:.2f}")
+for i, c in enumerate(coords):
+    print(f"Cylinder {best[i]} -> x={c[0]:.2f}, y={c[1]:.2f}, r={c[2]:.2f}")
+        return best, coords
 
-            return best, coords
+#keep best solutions
+    new_pop = population[:EliteSize]
+
+    #create new population
+    while len(new_pop) < PopSize:
+
+        #pick two parents
+        p1, p2 = random.sample(population[:30], 2)
+
+        #create child
+        child = crossover(p1, p2)
+
+        #mutate child
+        mutate(child)
+
+        #add child to new population
+        new_pop.append(child)
+
+    #replace old population
+    population = new_pop
