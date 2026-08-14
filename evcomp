@@ -205,3 +205,6 @@ for i, c in enumerate(coords):
         print(f"Cylinder {best[i]} -> x={c[0]:.2f}, y={c[1]:.2f}, r={c[2]:.2f}")
 
     return best, coords
+
+#keeps best solution
+best_ordering, best_coords = run_ga()
