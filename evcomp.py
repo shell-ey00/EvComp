@@ -16,7 +16,7 @@ CYLINDERS = [
 ]
 
 PopSize = 80  #population size of solution
-Generations = 400   #re runs
+Generations = 400   # re runs
 MutationRate = 0.8  #rate of change within shape layout
 EliteSize = 5  #unchanged solutions
 
@@ -83,7 +83,7 @@ def fitness(individual):
     if total_weight > MaxWeight:
         return 1e6 + (total_weight - MaxWeight) * 1000
 
-    cx = sum(placed[i][0] * CYLINDERS[individual[i]][1]  #calc the weight of center
+    cx = sum(placed[i][0] * CYLINDERS[individual[i]][1]
              for i in range(len(placed))) / total_weight
 
     cy = sum(placed[i][1] * CYLINDERS[individual[i]][1]
@@ -143,57 +143,59 @@ def mutate(ind):  #gives random positions
         #swap positions
         ind[i], ind[j] = ind[j], ind[i]
 
+
 def run_ga():
     #create random population
     population = [create_individual() for _ in range(PopSize)]
 
-#repeat for amount of gens
-for gen in range(Generations):
+    #repeat for amount of gens
+    for gen in range(Generations):
 
-    #sort population by fitness
-    population.sort(key=fitness)
+        #sort population by fitness
+        population.sort(key=fitness)
 
         #get current best solution
         best = population[0]
         best_fit = fitness(best)
 
-    print("Generation", gen, "| Best fitness:", best_fit)
+        print("Generation", gen, "| Best fitness:", best_fit)
 
-#looking for best sol
-if best_fit == 0:
+        #looking for best sol
+        if best_fit == 0:
 
-    coords = place_cylinders(best)
+            coords = place_cylinders(best)
 
-    print("\nPERFECT SOLUTION FOUND")
-    print("Ordering:", best)
-    print("Coordinates:")
+            print("\nPERFECT SOLUTION FOUND")
+            print("Ordering:", best)
+            print("Coordinates:")
 
-for i, c in enumerate(coords):
-    print(f"Cylinder {best[i]} -> x={c[0]:.2f}, y={c[1]:.2f}, r={c[2]:.2f}")
-        return best, coords
+            for i, c in enumerate(coords):
+                print(f"Cylinder {best[i]} -> x={c[0]:.2f}, y={c[1]:.2f}, r={c[2]:.2f}")
 
-#keep best solutions
-    new_pop = population[:EliteSize]
+            return best, coords
 
-#create new population
-    while len(new_pop) < PopSize:
+        #keeps best solution
+        new_pop = population[:EliteSize]
 
-        #pick two parents
-        p1, p2 = random.sample(population[:30], 2)
+        #create new population
+        while len(new_pop) < PopSize:
 
-        #create child
-        child = crossover(p1, p2)
+            #pick two parents
+            p1, p2 = random.sample(population[:30], 2)
 
-        #mutate child
-        mutate(child)
+            #create child
+            child = crossover(p1, p2)
 
-        #add child to new population
-        new_pop.append(child)
+            #mutate child
+            mutate(child)
 
-    #replace old population
-    population = new_pop
+            #add child to new population
+            new_pop.append(child)
 
-#if perfect solution not found
+        #replace old population
+        population = new_pop
+
+    #if perfect solution not found
     best = population[0]
     coords = place_cylinders(best)
 
@@ -205,6 +207,7 @@ for i, c in enumerate(coords):
         print(f"Cylinder {best[i]} -> x={c[0]:.2f}, y={c[1]:.2f}, r={c[2]:.2f}")
 
     return best, coords
+
 
 #keeps best solution
 best_ordering, best_coords = run_ga()
