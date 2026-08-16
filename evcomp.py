@@ -121,37 +121,78 @@ def place_cylinders(ordering):  # placement
 
         placed.append(best_position)
 
-    return placed #if ok
+    return placed
+
 
 def fitness(individual):
-    placed = place_cylinders(individual)  #places individual cylinders gives it x y coords
 
-    if placed is None:  #give bad penalty if they overlap or in out of bounds area
-        return 1e6
+    # place the cylinders using the ordering
+    # also checks if they can be placed properly
+    placed = place_cylinders(individual)
 
-    total_weight = sum(CYLINDERS[i][1] for i in individual)  #checks the weight is good
+    # if cylinders cant all be placed give a bad fitness
+    if placed is None:
+        return 1000000
 
-    #if the weight is greater than total weight must return invalid value
+    # calculate total weight of all cylinders
+    total_weight = sum(
+        CYLINDERS[i][1]
+        for i in individual
+    )
+
+    # check if the weight is too high
     if total_weight > MaxWeight:
-        return 1e6 + (total_weight - MaxWeight) * 1000
+        # give a big penalty if weight is over the limit
+        return 1000000 + (total_weight - MaxWeight) * 1000
 
-    cx = sum(placed[i][0] * CYLINDERS[individual[i]][1]
-             for i in range(len(placed))) / total_weight
+    # calculate the x position of the centre of mass
+    # uses the weight of each cylinder
+    cx = sum(
+        placed[i][0] * CYLINDERS[individual[i]][1]
+        for i in range(len(placed))
+    ) / total_weight
 
-    cy = sum(placed[i][1] * CYLINDERS[individual[i]][1]
-             for i in range(len(placed))) / total_weight
+    # calculate the y position of the centre of mass
+    cy = sum(
+        placed[i][1] * CYLINDERS[individual[i]][1]
+        for i in range(len(placed))
+    ) / total_weight
 
-    balance_penalty = abs(cx - ContainerWidth / 2) + \
-                      abs(cy - ContainerDepth / 2)  #calcs the center of mass
+    # central 60% of the container
+    # 20% is left on each side
+    safe_min_x = ContainerWidth * 0.20
+    safe_max_x = ContainerWidth * 0.80
 
-    used_area = sum(math.pi * p[2]**2 for p in placed)  #used area by cylinders
-    wasted_area = (ContainerWidth * ContainerDepth) - used_area  #unused area
+    safe_min_y = ContainerDepth * 0.20
+    safe_max_y = ContainerDepth * 0.80
 
-    if wasted_area <= 0.01 and balance_penalty < 0.5:  #if less wasted area the better
+    # starts with no balance penalty
+    balance_penalty = 0
+
+    # check if centre of mass is too far left
+    if cx < safe_min_x:
+        balance_penalty += safe_min_x - cx
+
+    # check if centre of mass is too far right
+    if cx > safe_max_x:
+        balance_penalty += cx - safe_max_x
+
+    # check if centre of mass is too far down
+    if cy < safe_min_y:
+        balance_penalty += safe_min_y - cy
+
+    # check if centre of mass is too far up
+    if cy > safe_max_y:
+        balance_penalty += cy - safe_max_y
+
+    # if centre of mass is in the safe area
+    # then all the constraints are met
+    if balance_penalty == 0:
         return 0
 
-    #return wasted area and penalty
-    return wasted_area + balance_penalty * 100
+    # give a penalty if the centre of mass is outside
+    # lower fitness means a better solution
+    return balance_penalty * 1000
 
 
 def create_individual():  #create random sol
