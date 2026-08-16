@@ -34,42 +34,94 @@ def overlap(c1, c2):
     return dist(x1, y1, x2, y2) < (r1 + r2)
 
 
-def place_cylinders(ordering):  #placement
+def place_cylinders(ordering):  # placement
     placed = []
 
-    #go through cylinder ordering
+    # go through cylinder ordering
     for idx in ordering:
-        d, w = CYLINDERS[idx]  #getting size d= diameter w= weight
+        d, w = CYLINDERS[idx]  # getting size d = diameter, w = weight
         r = d / 2.0
-        PlacedFlag = False  #if placed successfully
 
-        y = r  #start from bottom
-        while y <= ContainerDepth - r:
+        # first cylinder goes in the centre
+        if len(placed) == 0:
+            x = ContainerWidth / 2
+            y = ContainerDepth / 2
 
-            x = r
-            while x <= ContainerWidth - r:  #left to right placement
+            # make sure the first cylinder fits
+            if (x - r >= 0 and
+                    x + r <= ContainerWidth and
+                    y - r >= 0 and
+                    y + r <= ContainerDepth):
+
+                placed.append((x, y, r))
+                continue
+
+            return None
+
+        # store possible positions
+        possible_positions = []
+
+        # look around every cylinder already placed
+        for existing in placed:
+
+            ex, ey, er = existing
+
+            # shell radius = existing radius + new cylinder radius
+            shell_radius = er + r
+
+            # sample points around the shell
+            for angle in range(0, 360, 2):
+
+                angle_radians = math.radians(angle)
+
+                x = ex + math.cos(angle_radians) * shell_radius
+                y = ey + math.sin(angle_radians) * shell_radius
+
+                # check if cylinder is inside container
+                if x - r < 0:
+                    continue
+
+                if x + r > ContainerWidth:
+                    continue
+
+                if y - r < 0:
+                    continue
+
+                if y + r > ContainerDepth:
+                    continue
 
                 candidate = (x, y, r)
 
-                #check if any overlaps
+                # check if candidate overlaps anything already placed
                 if all(not overlap(candidate, p) for p in placed):
-                    placed.append(candidate)
-                    PlacedFlag = True
-                    break
 
-                x += 1
+                    # calculate distance from centre of container
+                    centre_x = ContainerWidth / 2
+                    centre_y = ContainerDepth / 2
 
-            if PlacedFlag:
-                break
+                    distance_from_centre = dist(
+                        x,
+                        y,
+                        centre_x,
+                        centre_y
+                    )
 
-            y += 1
+                    possible_positions.append(
+                        (distance_from_centre, candidate)
+                    )
 
-        #stop if wrong placement
-        if not PlacedFlag:
+        # if no valid position was found
+        if not possible_positions:
             return None
 
-    return placed  #place if ok
+        # choose valid position closest to centre
+        possible_positions.sort(key=lambda item: item[0])
 
+        best_position = possible_positions[0][1]
+
+        placed.append(best_position)
+
+    return placed #if ok
 
 def fitness(individual):
     placed = place_cylinders(individual)  #places individual cylinders gives it x y coords
