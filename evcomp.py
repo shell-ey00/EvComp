@@ -2,17 +2,17 @@ import random
 import math
 
 # where cylinders are placed
-ContainerWidth = 100
-ContainerDepth = 60
-MaxWeight = 500
+ContainerWidth = 15.0
+ContainerDepth = 12.0
+MaxWeight = 200.0
 
 # Cylinder array (diameter, weight)
 CYLINDERS = [
-    (20, 80),
-    (15, 60),
-    (25, 120),
-    (10, 40),
-    (30, 200)
+    (3.5, 25.0),
+    (3.0, 20.0),
+    (2.5, 18.0),
+    (2.5, 18.0),
+    (2.0, 15.0)
 ]
 
 PopSize = 80  #population size of solution
